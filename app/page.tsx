@@ -1,103 +1,297 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import { SparklesCore } from "@/components/ui/sparkles"
+
+export default function EduPortalLanding() {
+
+  const [selectedRole, setSelectedRole] = useState<"student" | "teacher" | null>(null)
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    setIsLoaded(true)
+    // Check if wallet is already connected
+    checkWalletConnection()
+  }, [])
+
+  const checkWalletConnection = async () => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_accounts" })
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0])
+        }
+      } catch (error) {
+        console.log("Error checking wallet connection:", error)
+      }
+    }
+  }
+
+  const connectWallet = async () => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      setIsConnecting(true)
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
+        setWalletAddress(accounts[0])
+      } catch (error) {
+        console.error("Error connecting wallet:", error)
+      } finally {
+        setIsConnecting(false)
+      }
+    } else {
+      alert("Please install MetaMask or another Web3 wallet!")
+    }
+  }
+
+  const disconnectWallet = () => {
+    setWalletAddress(null)
+    setSelectedRole(null)
+  }
+
+  const handleRegister = () => {
+    if (!walletAddress) {
+      connectWallet()
+    } else if (selectedRole) {
+      // Handle registration logic here
+      alert(`Registering as ${selectedRole} with wallet: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`)
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-black to-indigo-950 text-white relative overflow-hidden">
+      {/* Animated Background */}
+       <SparklesCore
+    id="tsparticlesfullpage"
+    background="transparent"
+    minSize={0.6}
+    maxSize={1.4}
+    particleDensity={100}
+    className="absolute top-0 left-0 w-full h-full z-0"
+    particleColor="#FFFFFF"
+  />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Floating Particles */}
+      {Array.from({ length: 30 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-white/30 rounded-full animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`,
+          }}
+        />
+      ))}
+
+      {/* Main Content */}
+      <div
+        className={`relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12 transition-all duration-1000 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+        }`}
+      >
+        {/* Header */}
+        <div className="text-center mb-16 space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-6xl md:text-8xl font-light tracking-wider bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              EduChain
+            </h1>
+            <div className="w-24 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto"></div>
+          </div>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Join the future of decentralized education. Connect your wallet to get started.
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Wallet Status */}
+        {walletAddress && (
+          <div className="mb-8 p-4 bg-green-500/10 border border-green-500/30 rounded-xl backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-300 text-sm">
+                  Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                </span>
+              </div>
+              <button onClick={disconnectWallet} className="text-xs text-gray-400 hover:text-white transition-colors">
+                Disconnect
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Role Selection */}
+        <div className="grid md:grid-cols-2 gap-8 w-full max-w-3xl mb-12">
+          {/* Student Card */}
+          <div
+            className={`group relative cursor-pointer transition-all duration-500 ${
+              selectedRole === "student" ? "scale-105" : "hover:scale-102"
+            }`}
+            onClick={() => setSelectedRole(selectedRole === "student" ? null : "student")}
+          >
+            <div
+              className={`absolute inset-0 rounded-3xl transition-all duration-500 ${
+                selectedRole === "student"
+                  ? "bg-gradient-to-br from-blue-500/20 to-cyan-500/20 shadow-2xl shadow-blue-500/25 border-2 border-blue-400/50"
+                  : "bg-white/5 group-hover:bg-white/10 border border-white/10"
+              }`}
+            ></div>
+
+            <div className="relative p-8 backdrop-blur-sm rounded-3xl">
+              <div className="text-center space-y-6">
+                <div
+                  className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                    selectedRole === "student"
+                      ? "bg-blue-500 shadow-lg shadow-blue-500/50"
+                      : "bg-white/10 group-hover:bg-white/20"
+                  }`}
+                >
+                  <img className="" src="https://i.pinimg.com/736x/ef/a3/1f/efa31f21b681c3ed3f29c147de99d6aa.jpg">
+                </img>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-semibold mb-3">Student</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Access courses, submit assignments, and earn blockchain-verified certificates
+                  </p>
+                </div>
+
+                {selectedRole === "student" && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+                    {["Course Library Access", "Assignment Submission", "NFT Certificates", "Progress Tracking"].map(
+                      (feature, i) => (
+                        <div key={i} className="flex items-center justify-center text-sm text-blue-300">
+                          <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
+                          {feature}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Teacher Card */}
+          <div
+            className={`group relative cursor-pointer transition-all duration-500 ${
+              selectedRole === "teacher" ? "scale-105" : "hover:scale-102"
+            }`}
+            onClick={() => setSelectedRole(selectedRole === "teacher" ? null : "teacher")}
+          >
+            <div
+              className={`absolute inset-0 rounded-3xl transition-all duration-500 ${
+                selectedRole === "teacher"
+                  ? "bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-2xl shadow-purple-500/25 border-2 border-purple-400/50"
+                  : "bg-white/5 group-hover:bg-white/10 border border-white/10"
+              }`}
+            ></div>
+
+            <div className="relative p-8 backdrop-blur-sm rounded-3xl">
+              <div className="text-center space-y-6">
+                <div
+                  className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                    selectedRole === "teacher"
+                      ? "bg-purple-500 shadow-lg shadow-purple-500/50"
+                      : "bg-white/10 group-hover:bg-white/20"
+                  }`}
+                >
+                 <img className="" src="https://i.pinimg.com/736x/13/f6/95/13f695dcfcd259a05af600e934bba297.jpg">
+                </img>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-semibold mb-3">Teacher</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Create courses, manage students, and issue verified credentials
+                  </p>
+                </div>
+
+                {selectedRole === "teacher" && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
+                    {["Course Creation", "Student Management", "Grade Assignments", "Issue Certificates"].map(
+                      (feature, i) => (
+                        <div key={i} className="flex items-center justify-center text-sm text-purple-300">
+                          <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-3"></div>
+                          {feature}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-4">
+          {!walletAddress ? (
+            <button
+              onClick={connectWallet}
+              disabled={isConnecting}
+              className="group relative px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full font-medium transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="relative z-10 flex items-center space-x-2">
+                {isConnecting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>Connect Wallet</span>
+                  </>
+                )}
+              </span>
+              <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+          ) : selectedRole ? (
+            <button
+              onClick={handleRegister}
+              className={`group relative px-8 py-4 rounded-full font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
+                selectedRole === "student"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-2xl hover:shadow-blue-500/25"
+                  : "bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-2xl hover:shadow-purple-500/25"
+              }`}
+            >
+              <span className="relative z-10">Register as {selectedRole === "student" ? "Student" : "Teacher"}</span>
+              <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+          ) : (
+            <p className="text-gray-400 text-center">Select a role to continue</p>
+          )}
+        </div>
+
+        {/* Login Option */}
+        {walletAddress && (
+          <div className="m-8 text-center">
+            <p className="text-gray-400 mb-4">Already have an account?</p>
+            <button className="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 underline underline-offset-4">
+              Login with Wallet
+            </button>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-6 text-xs text-gray-500">
+          <button className="hover:text-white transition-colors duration-300">Privacy</button>
+          <button className="hover:text-white transition-colors duration-300">Terms</button>
+          <button className="hover:text-white transition-colors duration-300">Help</button>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
