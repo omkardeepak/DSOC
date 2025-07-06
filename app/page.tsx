@@ -1,14 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect,useRef } from "react"
 import { SparklesCore } from "@/components/ui/sparkles"
 
 export default function EduPortalLanding() {
 
   const [selectedRole, setSelectedRole] = useState<"student" | "teacher" | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
-  const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  const [walletAddress, setWalletAddress] = useState("")
   const [isLoaded, setIsLoaded] = useState(false)
+  const registerRef = useRef<HTMLDivElement>(null)
+  const [showRegister, setShowRegister] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    department: "",
+    year: "",
+    email: "",
+    collegeId: "",
+    wallet: walletAddress,
+  });
 
   useEffect(() => {
     setIsLoaded(true)
@@ -29,6 +40,48 @@ export default function EduPortalLanding() {
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  useEffect(() => {
+  setFormData(prev => ({ ...prev, wallet: walletAddress }));
+  }, [walletAddress]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(walletAddress)
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        // alert("Registration successful!");
+        // setFormData({
+        //   name: "",
+        //   department: "",
+        //   year: "",
+        //   email: "",
+        //   collegeId: "",
+        //   wallet: "",
+        // });
+        // setShowRegister(false);
+      } else {
+        alert("Something went wrong.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit form.");
+    }
+  };
+
+
   const connectWallet = async () => {
     if (typeof window !== "undefined" && window.ethereum) {
       setIsConnecting(true)
@@ -46,18 +99,18 @@ export default function EduPortalLanding() {
   }
 
   const disconnectWallet = () => {
-    setWalletAddress(null)
+    setWalletAddress("")
     setSelectedRole(null)
   }
 
-  const handleRegister = () => {
-    if (!walletAddress) {
-      connectWallet()
-    } else if (selectedRole) {
-      // Handle registration logic here
-      alert(`Registering as ${selectedRole} with wallet: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`)
-    }
-  }
+
+  const handleRegisterClick = () => {
+    setShowRegister(true);
+    setTimeout(() => {
+      registerRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100); // small delay to allow DOM to render
+  };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-black to-indigo-950 text-white relative overflow-hidden">
@@ -260,7 +313,7 @@ export default function EduPortalLanding() {
             </button>
           ) : selectedRole ? (
             <button
-              onClick={handleRegister}
+              onClick={handleRegisterClick}
               className={`group relative px-8 py-4 rounded-full font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
                 selectedRole === "student"
                   ? "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-2xl hover:shadow-blue-500/25"
@@ -284,6 +337,78 @@ export default function EduPortalLanding() {
             </button>
           </div>
         )}
+
+      <div ref={registerRef}>
+        {showRegister && (
+          <section className="max-w-xl mx-auto bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <h2 className="text-2xl font-semibold mb-6">Registration Form</h2>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Full Name"
+                className="w-full p-2 rounded bg-black border border-white/10"
+                required
+              />
+              <input
+                type="text"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                placeholder="Department"
+                className="w-full p-2 rounded bg-black border border-white/10"
+                required
+              />
+              <select
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-black border border-white/10"
+                required
+              >
+                <option value="">Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email ID"
+                className="w-full p-2 rounded bg-black border border-white/10"
+                required
+              />
+              <input
+                type="text"
+                name="collegeId"
+                value={formData.collegeId}
+                onChange={handleChange}
+                placeholder="College ID"
+                className="w-full p-2 rounded bg-black border border-white/10"
+                required
+              />
+              <input
+                type="text"
+                name="wallet"
+                value={walletAddress}
+                readOnly
+                className="w-full p-2 rounded bg-black border border-white/10 text-gray-400"
+              />
+              <button
+                type="submit"
+                className="w-full mt-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded hover:scale-105 transition"
+              >
+                Submit
+              </button>
+            </form>
+          </section>
+        )}
+      </div>
 
         {/* Footer */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-6 text-xs text-gray-500">
