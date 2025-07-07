@@ -7,22 +7,36 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { name, department, year, email, collegeId, wallet } = body;
 
-   const { error } = await supabase.from('std_users').insert([
+  const { data: existingUser, error: fetchError } = await supabase
+    .from('std_users')
+    .select('collegeId')
+    .eq('wallet', wallet)
+    .single();
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    return NextResponse.json({ message: 'Error checking wallet', error: fetchError }, { status: 500 });
+  }
+
+  if (existingUser) {
+    return NextResponse.json({ message: 'Wallet already exists' }, { status: 409 });
+  }
+
+  const { error: insertError } = await supabase.from('std_users').insert([
     {
-      wallet,
       name,
       department,
       year,
       email,
-      collegeId,
-      
+      college_id: collegeId, // use correct DB column name
+      wallet,
     },
   ]);
 
-  if (error) {
-    return NextResponse.json({ message: 'Error saving data', error }, { status: 500 });
+  if (insertError) {
+    return NextResponse.json({ message: 'Error saving data', error: insertError }, { status: 500 });
   }
-console.log({ name, department, year, email, collegeId, wallet })
+
+  console.log({ name, department, year, email, collegeId, wallet })
 
   return NextResponse.json({ message: { name, department, year, email, collegeId, wallet } }, { status: 200 });
 }

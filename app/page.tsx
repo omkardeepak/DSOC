@@ -64,7 +64,6 @@ export default function EduPortalLanding() {
       });
 
       if (res.ok) {
-        alert("Registration successful!");
         setFormData({
           name: "",
           department: "",
@@ -74,8 +73,10 @@ export default function EduPortalLanding() {
           wallet: "",
         });
         setShowRegister(false);
+
       } else {
-        alert("Something went wrong.");
+      const result = await res.json();
+      alert(result.message)
       }
     } catch (err) {
       console.error(err);
