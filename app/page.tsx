@@ -11,6 +11,7 @@ export default function EduPortalLanding() {
   const [isLoaded, setIsLoaded] = useState(false)
   const registerRef = useRef<HTMLDivElement>(null)
   const [showRegister, setShowRegister] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,13 +45,14 @@ export default function EduPortalLanding() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+  
   useEffect(() => {
   setFormData(prev => ({ ...prev, wallet: walletAddress }));
   }, [walletAddress]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(walletAddress)
+    setIsLoading(true);
 
     try {
       const res = await fetch("/api/register", {
@@ -62,16 +64,16 @@ export default function EduPortalLanding() {
       });
 
       if (res.ok) {
-        // alert("Registration successful!");
-        // setFormData({
-        //   name: "",
-        //   department: "",
-        //   year: "",
-        //   email: "",
-        //   collegeId: "",
-        //   wallet: "",
-        // });
-        // setShowRegister(false);
+        alert("Registration successful!");
+        setFormData({
+          name: "",
+          department: "",
+          year: "",
+          email: "",
+          collegeId: "",
+          wallet: "",
+        });
+        setShowRegister(false);
       } else {
         alert("Something went wrong.");
       }
@@ -79,6 +81,9 @@ export default function EduPortalLanding() {
       console.error(err);
       alert("Failed to submit form.");
     }
+    finally {
+    setIsLoading(false);
+  }
   };
 
 
@@ -401,10 +406,38 @@ export default function EduPortalLanding() {
               />
               <button
                 type="submit"
-                className="w-full mt-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded hover:scale-105 transition"
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-4 py-2 w-full rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="w-4 h-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                      />
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </button>
+
             </form>
           </section>
         )}
